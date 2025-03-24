@@ -4,6 +4,24 @@ document.addEventListener("DOMContentLoaded", () => {
   const signupForm = document.getElementById("signup-form");
   const messageDiv = document.getElementById("message");
 
+  // Dark mode toggle
+  const darkModeToggle = document.getElementById("darkModeToggle");
+  const body = document.body;
+
+  // Check for saved dark mode preference
+  const darkMode = localStorage.getItem("darkMode");
+  if (darkMode === "enabled") {
+    body.classList.add("dark-mode");
+  }
+
+  darkModeToggle.addEventListener("click", () => {
+    body.classList.toggle("dark-mode");
+    localStorage.setItem(
+      "darkMode",
+      body.classList.contains("dark-mode") ? "enabled" : "disabled"
+    );
+  });
+
   // Function to fetch activities from API
   async function fetchActivities() {
     try {
@@ -24,10 +42,13 @@ document.addEventListener("DOMContentLoaded", () => {
           <h4>${name}</h4>
           <p>${details.description}</p>
           <p><strong>Schedule:</strong> ${details.schedule}</p>
-          <p><strong>Availability:</strong> ${spotsLeft} spots left</p>
-          <p><strong>Participants:</strong> ${details.participants.join(", ") || "None"}</p>
+          <p><strong>Availability:</strong> ${spotsLeft} spots left out of ${details.max_participants}</p>
+          <h5>Current Participants:</h5>
           <ul>
-            ${details.participants.map(participant => `<li>${participant}</li>`).join("")}
+            ${details.participants.length > 0 
+              ? details.participants.map(participant => `<li>${participant}</li>`).join("")
+              : "<li>No participants yet</li>"
+            }
           </ul>
         `;
 
@@ -36,7 +57,7 @@ document.addEventListener("DOMContentLoaded", () => {
         // Add option to select dropdown
         const option = document.createElement("option");
         option.value = name;
-        option.textContent = name;
+        option.textContent = `${name} (${spotsLeft} spots left)`;
         activitySelect.appendChild(option);
       });
     } catch (error) {
